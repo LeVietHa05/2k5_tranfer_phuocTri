@@ -1,18 +1,26 @@
-import better_sqlite3 from 'better-sqlite3';
+import sqlite3 from "sqlite3";
 
-// Initialize the database
-const db = better_sqlite3('sensorData.db');
+// Khai báo kiểu cho `db`
+const db: sqlite3.Database = new sqlite3.Database("sensorData.db", (err) => {
+  if (err) {
+    console.error("Database connection error:", err.message);
+  } else {
+    console.log("Connected to SQLite database.");
+  }
+});
 
-// Create a table for sensor data if it doesn't exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS sensor_data (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    salinity REAL,
-    pH REAL,
-    turbidity REAL,
-    temperature REAL,
-    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
+// Tạo bảng nếu chưa tồn tại
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS sensor_data (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      salinity REAL,
+      pH REAL,
+      turbidity REAL,
+      temperature REAL,
+      timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+});
 
 export default db;

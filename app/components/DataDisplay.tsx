@@ -3,6 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
+import { format } from "date-fns";
+
+const formatTimestamp = (timestamp: string) => {
+  return format(new Date(timestamp), "MM/dd HH:mm");
+};
 
 Chart.register(...registerables);
 
@@ -49,7 +54,7 @@ const DataDisplay = () => {
 
   const getChartData = function (whatdata: keyof SensorData, label: string) {
     return {
-      labels: data ? data.map((d) => d.timestamp) : [],
+      labels: data ? data.map((d) => formatTimestamp(d.timestamp)) : [],
       datasets: [
         {
           label: label,

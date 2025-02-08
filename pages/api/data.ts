@@ -1,40 +1,89 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import db from "./db"; // Import the database
+import db from "./db"; // Import database connection
+
+interface SensorData {
+  salinity: number;
+  pH: number;
+  turbidity: number;
+  temperature: number;
+  timestamp: string;
+}
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { salinity, pH, turbidity, temperature } = req.body; // Extract data from the request body
+    try {
+      const { salinity, pH, turbidity, temperature } = req.body;
 
-    // Store the received data in the database
-    const stmt = db.prepare(
-      "INSERT INTO sensor_data (salinity, pH, turbidity, temperature) VALUES (?, ?, ?, ?)"
-    );
-    stmt.run(
-      Number(salinity),
-      Number(pH),
-      Number(turbidity),
-      Number(temperature)
-    );
+      if (
+        salinity === undefined ||
+        pH === undefined ||
+        turbidity === undefined ||
+        temperature === undefined
+      ) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
 
-    // Here you can process the data as needed
-    console.log("Received data:", { salinity, pH, turbidity, temperature });
+      // Chèn dữ liệu vào database (bất đồng bộ)
+      db.run(
+        "INSERT INTO sensor_data (salinity, pH, turbidity, temperature) VALUES (?, ?, ?, ?)",
+        [Number(salinity), Number(pH), Number(turbidity), Number(temperature)],
+        function (err) {
+          if (err) {
+            console.error("Database insert error:", err.message);
+            return res.status(500).json({ message: "Database insert error" });
+          }
 
-    // Respond with a success message
-    res.status(200).json({ message: "Data received successfully" });
+          console.log("Data inserted into the database:", {
+            id: this.lastID,
+            salinity,
+            pH,
+            turbidity,
+            temperature,
+          });
+
+          return res.status(200).json({
+            message: "Data received successfully",
+            id: this.lastID,
+          });
+        }
+      );
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
   } else if (req.method === "GET") {
-    //get the params to know how many data we need
-    const { limit = 10 } = req.query; // Get the limit from the query string
-    console.log(limit);
-    const recentData = db
-      .prepare(
-        `SELECT * FROM sensor_data ORDER BY timestamp DESC LIMIT ?`
-      )
-      .all(limit);
-    console.log(recentData);
-    res.status(200).json(recentData); // Respond with the most recent sensor data
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      console.log("Limit for retrieval:", limit);
+
+      // Dùng Promise để xử lý db.get bất đồng bộ
+      const getRecentData = () =>
+        new Promise<SensorData[]>((resolve, reject) => {
+          db.all(
+            "SELECT * FROM sensor_data ORDER BY timestamp DESC LIMIT ?",
+            [limit],
+            (err, rows: SensorData[]) => {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(rows);
+              }
+            }
+          );
+        });
+
+      const recentData = await getRecentData();
+
+      console.log("Recent data retrieved:", recentData);
+      res.status(200).json(recentData);
+    } catch (error) {
+      console.error("Database retrieval error:", error);
+      res.status(500).json({ message: "Database retrieval error" });
+    }
   } else {
     res.setHeader("Allow", ["POST", "GET"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
