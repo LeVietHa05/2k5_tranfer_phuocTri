@@ -5,7 +5,7 @@ Chart.register(...registerables);
 
 interface dataInterface {
   data: {
-    labels: any[];
+    labels: (number | string)[];
     datasets: {
       label: string;
       data: (string | number)[];
