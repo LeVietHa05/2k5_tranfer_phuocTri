@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
-import { Chart, registerables } from "chart.js";
+import LineChart from "./LineChart";
 import { format } from "date-fns";
+import Image from "next/image";
 
 const formatTimestamp = (timestamp: string) => {
   return format(new Date(timestamp), "MM/dd HH:mm");
 };
-
-Chart.register(...registerables);
 
 interface SensorData {
   salinity: number;
@@ -21,6 +19,7 @@ interface SensorData {
 
 const DataDisplay = () => {
   const [data, setData] = useState<SensorData[] | null>(null);
+  const [timer, setTime] = useState(0);
 
   useEffect(() => {
     // const sendTestData = async () => {
@@ -44,14 +43,16 @@ const DataDisplay = () => {
       const response = await fetch("/api/data?limit=10");
       const result: SensorData[] = await response.json();
       console.log("Fetched data:", result); // Log the fetched data
-      setData(result);
+      setData(result.reverse());
       console.log("Data state after set:", result); // Log the data state
     };
     // sendTestData().then(() => {
     fetchData();
     // });
-  }, []);
-
+  }, [timer]);
+  setTimeout(() => {
+    setTime(timer + 1);
+  }, 5000);
   const getChartData = function (whatdata: keyof SensorData, label: string) {
     return {
       labels: data ? data.map((d) => formatTimestamp(d.timestamp)) : [],
@@ -59,8 +60,8 @@ const DataDisplay = () => {
         {
           label: label,
           data: data ? data.map((d) => d[whatdata]) : [],
-          backgroundColor: "rgba(75,192,192,0.4)",
-          borderColor: "rgba(75,192,192,1)",
+          backgroundColor: "rgba(75, 192, 192, 0.56)",
+          borderColor: "rgb(31, 126, 126)",
           borderWidth: 1,
         },
       ],
@@ -73,27 +74,39 @@ const DataDisplay = () => {
   const temperatureChartData = getChartData("temperature", "Temperature");
 
   return (
-    <div>
+    <div className="bg-cyan-50 p-4 w-3/4 m-auto rounded-lg text-center text-black shadow-md">
       {data ? (
         <div>
-          <h2>Received Data</h2>
-          <div className="grid grid-flow-col grid-cols-4 gap-4">
-            <div>
-              <Line className="w-1/4" data={salinityChartData} />
+          <h2 className=" mb-4 text-2xl">Data Center</h2>
+          <div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4 ">
+            <div className="bg-amber-300 rounded-lg shadow-lg">
+              <LineChart data={salinityChartData} />
+              <p className="p-1">Salinity Chart</p>
             </div>
-            <div>
-              <Line className="w-1/4" data={pHChartData} />
+            <div className="bg-amber-300 rounded-lg shadow-lg">
+              <LineChart data={pHChartData} />
+              <p className="p-1">pH Chart</p>
             </div>
-            <div>
-              <Line className="w-1/4" data={turbidityChartData} />
+            <div className="bg-amber-300 rounded-lg shadow-lg">
+              <LineChart data={turbidityChartData} />
+              <p className="p-1">Turbidity Chart</p>
             </div>
-            <div>
-              <Line className="w-1/4" data={temperatureChartData} />
+            <div className="bg-amber-300 rounded-lg shadow-lg">
+              <LineChart data={temperatureChartData} />
+              <p className="p-1">Temperature Chart</p>
             </div>
           </div>
         </div>
       ) : (
-        <p>Loading...</p>
+        <div>
+          <p>Loading...</p>
+          <Image
+            src={"/loading-gif.gif"}
+            alt="loading"
+            width={100}
+            height={100}
+            unoptimized></Image>
+        </div>
       )}
     </div>
   );
