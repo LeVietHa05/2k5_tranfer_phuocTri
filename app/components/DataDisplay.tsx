@@ -74,24 +74,24 @@ const DataDisplay = () => {
   const temperatureChartData = getChartData("temperature", "Temperature");
 
   return (
-    <div className="bg-cyan-50 p-4 w-3/4 m-auto rounded-lg text-center text-black shadow-md">
+    <div className="bg-cyan-100 p-4 w-3/4 m-auto rounded-lg text-center text-black shadow-md">
       {data ? (
         <div>
           <h2 className=" mb-4 text-2xl">Data Center</h2>
           <div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4 ">
-            <div className="bg-amber-300 rounded-lg shadow-lg">
+            <div className="bg-amber-300 rounded-lg shadow-lg p-2">
               <LineChart data={salinityChartData} />
               <p className="p-1">Salinity Chart</p>
             </div>
-            <div className="bg-amber-300 rounded-lg shadow-lg">
+            <div className="bg-amber-300 rounded-lg shadow-lg p-2">
               <LineChart data={pHChartData} />
               <p className="p-1">pH Chart</p>
             </div>
-            <div className="bg-amber-300 rounded-lg shadow-lg">
+            <div className="bg-amber-300 rounded-lg shadow-lg p-2">
               <LineChart data={turbidityChartData} />
               <p className="p-1">Turbidity Chart</p>
             </div>
-            <div className="bg-amber-300 rounded-lg shadow-lg">
+            <div className="bg-amber-300 rounded-lg shadow-lg p-2">
               <LineChart data={temperatureChartData} />
               <p className="p-1">Temperature Chart</p>
             </div>
