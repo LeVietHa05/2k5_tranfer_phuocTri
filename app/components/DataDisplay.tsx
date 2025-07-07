@@ -85,7 +85,7 @@ const DataDisplay = () => {
           <div className="grid grid-flow-col grid-cols-2 grid-rows-2 gap-4 ">
             <div className="bg-amber-300 rounded-lg shadow-lg p-2">
               <LineChart data={salinityChartData} />
-              <p className="p-1">Salinity Chart</p>
+              <p className="p-1">TDS Chart</p>
             </div>
             <div className="bg-amber-300 rounded-lg shadow-lg p-2">
               <LineChart data={pHChartData} />
