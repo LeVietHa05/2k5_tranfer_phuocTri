@@ -40,7 +40,7 @@ export default async function handler(
           temperature,
           timestamp: new Date().toISOString(),
         },
-      ].slice(0, cache?.length ? cache?.length - 1 : 0);
+      ].slice(0, cache?.length ? cache?.length : 0);
 
       // Insert data into the database (asynchronously)
       db.run(

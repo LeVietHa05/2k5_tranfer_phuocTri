@@ -5,8 +5,12 @@ import LineChart from "./LineChart";
 import { format } from "date-fns";
 import Image from "next/image";
 
+//update timestamp to GMT + 7
 const formatTimestamp = (timestamp: string) => {
-  return format(new Date(timestamp), "MM/dd HH:mm");
+  const date = new Date(timestamp);
+  //adjust to gmt + 7
+  date.setHours(date.getHours() + 7);
+  return format(date, "dd/MM HH:mm");
 };
 
 interface SensorData {
@@ -105,7 +109,8 @@ const DataDisplay = () => {
             alt="loading"
             width={100}
             height={100}
-            unoptimized></Image>
+            unoptimized
+          ></Image>
         </div>
       )}
     </div>
